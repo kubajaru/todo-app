@@ -1,12 +1,27 @@
 package main
 
-import "fmt"
+import (
+	"database/sql"
+	"log/slog"
+	"os"
+
+	"example/todo-app/task"
+)
+
+const fileName = "sqlite.db"
 
 func main() {
-	fmt.Println("Heelo world!")
-	task := new(Task)
-	task.Id = "11111"
-	task.IsDone = true
-	task.Title = "Clean the room"
-	task.Print_this()
+	os.Remove(fileName)
+
+	db, err := sql.Open("sqlite3", fileName)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	taskRepository := task.NewSqliteRepository(db)
+
+	task := task.NewTask("test", false)
+
+	taskRepository.Migrate()
+
+	taskRepository.Create(*task)
 }
